@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+import traceback
 
 from logger import get_logger
 
@@ -18,8 +19,10 @@ class AsyncListenerCore:
         try:
             self.ws = await websockets.connect(self.wss_url)
             self.connected = True
+            return True
         except Exception as e:
             self.logger.error(f"Failed to connect to WebSocket: {e}")
+            return False
 
     async def _attempt_reconnect(self):
         attempt = 0
@@ -52,7 +55,7 @@ class AsyncListenerCore:
         except json.JSONDecodeError as e:
             self.logger.error(f"JSON decode error: {e}")
         except Exception as e:
-            self.logger.error(f"Unexpected error in _listen: {e}")
+            self.logger.error(f"Unexpected error in _listen: {traceback.print_exc()}")
 
     async def _send(self):
         while self.connected:
