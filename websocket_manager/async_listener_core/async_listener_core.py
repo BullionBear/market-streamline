@@ -2,6 +2,9 @@ import asyncio
 import websockets
 import json
 
+import log_config
+
+
 class AsyncListenerCore:
     def __init__(self, wss_url):
         self.wss_url = wss_url
