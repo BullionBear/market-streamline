@@ -1,96 +1,71 @@
 import asyncio
 import websockets
+from websockets.exceptions import ConnectionClosed
 import json
 import traceback
 
 from logger import get_logger
 
+logger = get_logger()
+
 
 class AsyncListenerCore:
-    def __init__(self, wss_url):
-        self.wss_url = wss_url
-        self.connected = False
-
-        self.ws = None
-        self.logger = get_logger()
-        self.queue = asyncio.Queue()
+    def __init__(self, url):
+        self.url = url
+        self.websocket = None
 
     async def connect(self):
         try:
-            self.ws = await websockets.connect(self.wss_url)
-            self.connected = True
+            self.websocket = await websockets.connect(self.url)
+            logger.info("Connected to WebSocket.")
             return True
         except Exception as e:
-            self.logger.error(f"Failed to connect to WebSocket: {e}")
+            logger.error(f"Error connecting to WebSocket: {e}")
             return False
 
-    async def _attempt_reconnect(self):
-        attempt = 0
-        while True:
-            await asyncio.sleep(5)  # Exponential backoff
-            self.logger.warning(f"Attempting to reconnect (Attempt {attempt + 1})")
-            await self.connect()
-            if self.connected:
-                return True
+    async def send(self, message):
+        if self.websocket:
+            await self.websocket.send(json.dumps(message))
+            logger.info(f"Sent message: {message}")
 
-    async def run(self, callback, *args, **kwargs):
-        while not self.connected and not await self._attempt_reconnect():
-            pass
-
-        websocket_task = asyncio.create_task(self._listen(callback, *args, **kwargs))
-        send_task = asyncio.create_task(self._send())
-        heartbeat_task = asyncio.create_task(self._heartbeat())
-        await asyncio.gather(websocket_task, send_task, heartbeat_task)
-
-    async def _listen(self, callback, *args, **kwargs):
+    async def receive(self):
         try:
-            while self.connected:
-                message = await self.ws.recv()
-                message = json.loads(message)
-                await callback(message, *args, **kwargs)
-        except websockets.ConnectionClosed:
-            self.logger.warning("Websocket connection closed")
-            self.connected = False
-            await self._attempt_reconnect()
-        except json.JSONDecodeError as e:
-            self.logger.error(f"JSON decode error: {e}")
-        except Exception as e:
-            self.logger.error(f"Unexpected error in _listen: {traceback.print_exc()}")
-
-    async def _send(self):
-        while self.connected:
-            message = await self.queue.get()
-            if message is None:
-                break
-            try:
-                await self.ws.send(message)
-                self.logger.info(f"Sent message: {message}")
-            except websockets.ConnectionClosed:
-                break
-            except Exception as e:
-                self.logger.error(f"Unexpected error in _send: {e}")
-
-    async def _heartbeat(self):
-        while self.connected:
-            try:
-                await self.ws.ping()
-                self.logger.debug("Ping!")
-                await asyncio.sleep(30)
-            except websockets.ConnectionClosed:
-                break
-            except Exception as e:
-                self.logger.error(f"Unexpected error in _heartbeat: {e}")
-
-    async def send(self, request):
-        self.logger.info(f"Putting request to queue: {request}")
-        await self.queue.put(json.dumps(request))
+            return await self.websocket.recv()
+        except websockets.exceptions.ConnectionClosed:
+            logger.warning("WebSocket connection closed.")
+            return None
 
     async def disconnect(self):
-        if self.connected:
-            self.logger.info("Disconnecting Websocket")
-            self.connected = False
-            await self.ws.close()
-            await self.queue.put(None)
+        if self.websocket:
+            await self.websocket.close()
+            logger.info("Disconnected from WebSocket.")
 
-    async def is_connected(self):
-        return self.connected
+    async def listen(self, callback):
+        while True:
+            message = await self.receive()
+            if message is None:
+                break
+            if callback:
+                await callback(message)
+
+    async def heartbeat(self):
+        while True:
+            if self.websocket:
+                try:
+                    await self.websocket.ping()
+                    logger.debug("Sent heartbeat ping.")
+                except websockets.exceptions.ConnectionClosed:
+                    logger.warning("Heartbeat ping failed, connection closed.")
+                    break
+            await asyncio.sleep(30)
+
+    async def run(self, subscription_request, callback):
+        while not await self.connect():
+            logger.warning("Attempting to reconnect...")
+            await asyncio.sleep(5)
+
+        await self.send(subscription_request)
+        heartbeat_task = asyncio.create_task(self.heartbeat())
+        listen_task = asyncio.create_task(self.listen(callback))
+
+        await asyncio.gather(heartbeat_task, listen_task)
