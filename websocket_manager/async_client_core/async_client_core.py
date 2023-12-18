@@ -1,12 +1,14 @@
 import asyncio
 import websockets
 import json
+import traceback
 
 from logger import get_logger
 
 logger = get_logger()
 
-class WebSocketClient:
+
+class AsyncClientCore:
     def __init__(self, uri, max_retries=5, retry_wait=5):
         self.uri = uri
         self.max_retries = max_retries
@@ -72,32 +74,3 @@ class WebSocketClient:
         if self.ping_task:
             self.ping_task.cancel()
         await asyncio.gather(self.receiver_task, self.ping_task, return_exceptions=True)
-
-
-async def callback_func(message):
-    print(message)
-
-async def main():
-    client = WebSocketClient("wss://fstream.binance.com/ws")
-    await client.connect()
-    subscription = {
-        "method": "SUBSCRIBE",
-        "params": ["btcusdt@depth5@100ms", "ethusdt@depth5@100ms"],
-        "id": 1
-    }
-    await client.send(subscription)
-    await client.start(callback_func)
-
-    # Example duration, modify as needed
-    await asyncio.sleep(10)
-    unsubscription = {
-        "method": "UNSUBSCRIBE",
-        "params": ["btcusdt@depth5@100ms"],
-        "id": 1
-    }
-
-    await client.send(unsubscription)
-    await asyncio.sleep(5)
-    await client.stop()
-
-asyncio.get_event_loop().run_until_complete(main())
