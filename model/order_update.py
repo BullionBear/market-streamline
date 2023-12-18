@@ -16,7 +16,7 @@ class OrderUpdate:
     b: List[Tuple[float, float]]
 
     @classmethod
-    def from_binance(cls, data: dict):
+    def from_binancef(cls, data: dict):
         symbol = data['s']
         base = symbol[:-4]  # Assuming the last 4 characters are the quote symbol
         quote = symbol[-4:]
@@ -26,10 +26,10 @@ class OrderUpdate:
 
         return cls(
             id=data['E'],
-            ex="binance",
+            ex="binancef",
             base=base,
             quote=quote,
-            inst="spot",
+            inst="perp",
             ts=data['T'],
             u=data['u'],
             pu=data['pu'],
