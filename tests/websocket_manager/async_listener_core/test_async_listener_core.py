@@ -9,9 +9,9 @@ logger = get_logger()
 class TestAsyncListenerCore(unittest.TestCase):
     async def async_test_websocket_connection(self):
         client = AsyncListenerCore("wss://fstream.binance.com/ws")
-        subscription_request = {
+        subscribe_request = {
             "method": "SUBSCRIBE",
-            "params": ["btcusdt@depth5@100ms"],
+            "params": ["btcusdt@depth5@100ms", "ethusdt@depth5@100ms"],
             "id": 1
         }
 
@@ -20,12 +20,14 @@ class TestAsyncListenerCore(unittest.TestCase):
             logger.info(f"Callback received message: {message}")
 
         try:
-            await client.run(subscription_request, callback=message_handler)
+            await client.run(subscribe_request, callback=message_handler)
             # Wait for 30 seconds before disconnecting
-            await asyncio.sleep(30)
+            logger.info("30 seconds passed, attempting to disconnect")
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
         finally:
             await client.disconnect()
-
+            logger.info("WebSocket client disconnected")
         # Add your assertions here if any
 
     def test_websocket_connection(self):
