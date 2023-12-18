@@ -1,26 +1,28 @@
 import asyncio
 import unittest
-from websocket_manager.binance import BinanceClient
+from websocket_manager.okex import OkexClient
 from logger import get_logger
 
 logger = get_logger()
 
 
-class TestBinanceClient(unittest.TestCase):
+class TestOkexClient(unittest.TestCase):
     async def async_test_websocket_connection(self):
-        client = BinanceClient()
+        client = OkexClient()
         await client.connect()
 
         async def callback_func(message):
             print(message)
 
-        await client.subscribe("btcusdt@depth5@100ms", "ethusdt@depth5@100ms")
+        await client.subscribe({"channel": "books5", "instId": "BTC-USDT-SWAP"},
+                               {"channel": "books5", "instId": "ETH-USDT-SWAP"}
+                               )
         await client.start(callback_func)
 
         # Example duration, modify as needed
         await asyncio.sleep(10)
 
-        await client.unsubscribe("btcusdt@depth5@100ms")
+        await client.unsubscribe({"channel": "books5", "instId": "BTC-USDT-SWAP"})
         await asyncio.sleep(5)
         await client.stop()
 

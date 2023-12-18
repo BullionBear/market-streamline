@@ -6,7 +6,7 @@ from logger import get_logger
 logger = get_logger()
 
 
-class TestAsyncClientCore(unittest.TestCase):
+class TestBinancefClient(unittest.TestCase):
     async def async_test_websocket_connection(self):
         client = BinancefClient()
         await client.connect()
