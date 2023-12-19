@@ -16,5 +16,5 @@ EXPOSE 80
 # Define environment variable
 ENV NAME World
 
-# Run app.py when the container launches
+# Run main.py when the container launches
 CMD ["uvicorn", "streamline.main:app", "--host", "0.0.0.0", "--port", "80"]
