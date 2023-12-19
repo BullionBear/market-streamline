@@ -16,8 +16,13 @@ async def message_handler(message):
 
 
 async def start_panel():
+    await client.connect()
     logger.info("Client get started")
     await client.start(message_handler)
+
+async def stop_panel():
+    await client.stop()
+
 
 
 @panel_router.get("/panel/status")
