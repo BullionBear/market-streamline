@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-ws_panel_router = APIRouter()
+panel_router = APIRouter()
 
 
 @ws_panel_router.get("/ws_panel/status")
