@@ -1,5 +1,5 @@
 import asyncpg
-import model
+from streamline import model
 from datetime import datetime
 from .const import INSERT_ORDER_UPDATE
 

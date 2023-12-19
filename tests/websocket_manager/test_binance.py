@@ -1,7 +1,7 @@
 import asyncio
 import unittest
-from websocket_manager.binance import BinanceClient
-from logger import get_logger
+from streamline.websocket_manager import BinanceClient
+from streamline.logger import get_logger
 
 logger = get_logger()
 

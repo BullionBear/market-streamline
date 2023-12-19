@@ -1,7 +1,6 @@
 import asyncio
 import unittest
-import asyncpg
-import model
+from streamline import model
 from db.pqsql_handler import PostgresSQLHandler  # Replace 'your_module' with the actual module name
 
 

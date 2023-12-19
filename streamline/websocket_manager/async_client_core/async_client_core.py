@@ -1,9 +1,8 @@
 import asyncio
 import websockets
 import json
-import traceback
 
-from logger import get_logger
+from streamline.logger import get_logger
 
 logger = get_logger()
 
