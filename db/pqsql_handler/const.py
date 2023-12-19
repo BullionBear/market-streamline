@@ -1,9 +1,4 @@
-INSERT_ORDERBOOK = '''
-INSERT INTO orderbook(id, timestamp, exchange, instrument, symbol) 
-VALUES($1, to_timestamp($2), $3, $4, $5)
-'''
-
-INSERT_DEPTH = '''
-INSERT INTO depth(id, layer, side, price, vol) 
-VALUES($1, $2, $3, $4, $5)
+INSERT_ORDER_UPDATE = '''
+INSERT INTO order_updates (id, ex, base, quote, inst, ts, u, pu, a_price, a_size, b_price, b_size)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 '''

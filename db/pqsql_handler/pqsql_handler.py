@@ -1,7 +1,9 @@
 import asyncpg
 import model
+from datetime import datetime
+from .const import INSERT_ORDER_UPDATE
 
-from .const import INSERT_ORDERBOOK, INSERT_DEPTH
+
 class PostgresSQLHandler:
     def __init__(self, username, password, database, host, port):
         self.username = username
@@ -17,24 +19,36 @@ class PostgresSQLHandler:
                                           database=self.database, host=self.host, port=self.port)
 
     async def insert_order_update(self, order_update: model.OrderUpdate):
-        # Insert into orderbook
-        await self.conn.execute(INSERT_ORDERBOOK,
-                                order_update.id, order_update.ts / 1000, order_update.ex, order_update.inst,
-                                order_update.base + order_update.quote)
+        # Convert the timestamp from milliseconds to a datetime object
+        ts_datetime = datetime.utcfromtimestamp(order_update.ts / 1000.0)
 
-        # Insert into depth for asks
-        for layer, (price, vol) in enumerate(order_update.a):
-            await self.conn.execute('''
-                INSERT INTO depth(id, layer, side, price, vol) 
-                VALUES($1, $2, 'ask', $3, $4)
-            ''', order_update.id, layer, price, vol)
+        # Prepare data for 'a' and 'b' columns
+        a_prices, a_sizes = zip(*order_update.a) if order_update.a else ([], [])
+        b_prices, b_sizes = zip(*order_update.b) if order_update.b else ([], [])
 
-        # Insert into depth for bids
-        for layer, (price, vol) in enumerate(order_update.b):
-            await self.conn.execute('''
-                INSERT INTO depth(id, layer, side, price, vol) 
-                VALUES($1, $2, 'bid', $3, $4)
-            ''', order_update.id, layer, price, vol)
+        # Insert data into the table
+        await self.conn.execute(INSERT_ORDER_UPDATE, order_update.id, order_update.ex, order_update.base, order_update.quote,
+                                order_update.inst, ts_datetime, order_update.u, order_update.pu,
+                                a_prices, a_sizes, b_prices, b_sizes)
+
+    async def insert_order_updates(self, order_updates: list[model.OrderUpdate]):
+        # Prepare the data for insertion
+        values = [
+            (
+                order_update.id, order_update.ex, order_update.base, order_update.quote,
+                order_update.inst, datetime.utcfromtimestamp(order_update.ts / 1000.0),
+                order_update.u, order_update.pu,
+                [price for price, _ in order_update.a],
+                [size for _, size in order_update.a],
+                [price for price, _ in order_update.b],
+                [size for _, size in order_update.b]
+            )
+            for order_update in order_updates
+        ]
+
+        # Execute the batch insert
+        await self.conn.executemany(INSERT_ORDER_UPDATE, values)
+
     async def disconnect(self):
         await self.conn.close()
         self.conn = None
