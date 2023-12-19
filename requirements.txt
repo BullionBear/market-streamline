@@ -1,2 +1,4 @@
 websockets
 asyncpg
+fastapi
+uvicorn[standard]
