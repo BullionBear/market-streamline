@@ -2,3 +2,4 @@ websockets
 asyncpg
 fastapi
 uvicorn[standard]
+pydantic

@@ -1,9 +1,8 @@
-from dataclasses import dataclass
+import pydantic
 from typing import List, Tuple
 
 
-@dataclass
-class OrderUpdate:
+class OrderUpdate(pydantic.BaseModel):
     id: int
     ex: str
     base: str
