@@ -1,11 +1,14 @@
 import uvicorn
 from fastapi import FastAPI
+from .middleware.auth_middleware import AuthMiddleware
 from .routers import panel_router, start_panel
 
 app = FastAPI()
 
 # Include routers
 app.include_router(panel_router)
+app.add_middleware(AuthMiddleware)
+
 
 
 @app.on_event("startup")

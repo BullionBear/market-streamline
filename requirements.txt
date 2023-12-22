@@ -3,3 +3,6 @@ asyncpg
 fastapi
 uvicorn[standard]
 pydantic
+pydantic-settings
+python-jose
+passlib
