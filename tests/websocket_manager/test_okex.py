@@ -1,6 +1,6 @@
 import asyncio
 import unittest
-from streamline.websocket_manager import OkexClient
+from streamline.websocket_manager.exchange.okex import OkexClient
 from streamline.logger import get_logger
 
 logger = get_logger()

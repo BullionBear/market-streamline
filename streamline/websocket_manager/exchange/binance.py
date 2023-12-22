@@ -1,9 +1,9 @@
-from .async_client_core import AsyncClientCore
+from streamline.websocket_manager.async_client_core import AsyncClientCore
 
 
-class BinancefClient(AsyncClientCore):
+class BinanceClient(AsyncClientCore):
     def __init__(self):
-        super().__init__("wss://fstream.binance.com/ws")
+        super().__init__("wss://stream.binance.com/ws")
 
     async def start(self, message_handler: callable):
         await super().start(message_handler)

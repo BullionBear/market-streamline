@@ -1,4 +1,4 @@
-from .async_client_core import AsyncClientCore
+from streamline.websocket_manager.async_client_core import AsyncClientCore
 
 
 class OkexClient(AsyncClientCore):
