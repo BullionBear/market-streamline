@@ -22,6 +22,7 @@ async def start_panel():
 
 @panel_router.get("/panel/status")
 async def get_status():
+    logger.info("Request!")
     return {"channel": "test"}
 
 
