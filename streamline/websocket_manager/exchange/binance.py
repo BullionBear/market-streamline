@@ -17,8 +17,8 @@ class BinanceClient(AsyncClientCore, Interface):
     async def get_channel(self):
         return self.channels
 
-    async def start(self, message_handler: callable):
-        await super().start(message_handler)
+    async def start(self, on_message: callable):
+        await super().start(on_message)
 
     async def on_depth5(self, base, quote, instrument):
         if instrument.lower() != 'spot' or quote.lower() != 'usdt':

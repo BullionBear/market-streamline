@@ -4,5 +4,4 @@ fastapi
 uvicorn[standard]
 pydantic
 pydantic-settings
-python-jose
-passlib
+aio_pika

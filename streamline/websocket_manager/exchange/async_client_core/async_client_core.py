@@ -62,8 +62,8 @@ class AsyncClientCore:
         except asyncio.CancelledError:
             logger.info("Ping task cancelled")
 
-    async def start(self, message_handler):
-        self.message_handler = message_handler
+    async def start(self, on_message):
+        self.message_handler = on_message
         self.receiver_task = asyncio.create_task(self.receive_messages())
         self.ping_task = asyncio.create_task(self.ping())
 

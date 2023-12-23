@@ -12,11 +12,7 @@ class Interface(ABC):
         pass
 
     @abstractmethod
-    async def start(self, message_handler: callable):
-        pass
-
-    @abstractmethod
-    async def subscribe(self, *channels):
+    async def start(self, on_message: callable):
         pass
 
     @abstractmethod
@@ -25,8 +21,4 @@ class Interface(ABC):
 
     @abstractmethod
     async def off_depth5(self, base, quote, instrument):
-        pass
-
-    @abstractmethod
-    async def unsubscribe(self, *channels):
         pass
