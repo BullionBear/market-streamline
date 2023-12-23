@@ -1,1 +1,1 @@
-from streamline.websocket_manager.exchange.binancef import BinancefClient
+from .ws_manager import WebsocketManagerFactory
