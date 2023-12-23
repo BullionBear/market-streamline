@@ -25,8 +25,10 @@ async def start_panel(exchange: str):
 
 @panel_router.get("/panel/status")
 async def get_info():
-    logger.info("Request!")
-    return {"channel": "test"}
+    return {
+        "ws": await client.get_ws_url(),
+        "channel": await client.get_channel()
+    }
 
 
 class SubscribePayload(BaseModel):
