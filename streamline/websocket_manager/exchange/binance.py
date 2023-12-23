@@ -1,7 +1,8 @@
-from streamline.websocket_manager.async_client_core import AsyncClientCore
+from .async_client_core import AsyncClientCore
+from .interface import Interface
 
 
-class BinanceClient(AsyncClientCore):
+class BinanceClient(AsyncClientCore, Interface):
     def __init__(self):
         super().__init__("wss://stream.binance.com/ws")
 

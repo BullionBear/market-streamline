@@ -1,6 +1,6 @@
 import asyncio
 import unittest
-from streamline.websocket_manager.async_client_core import AsyncClientCore
+from streamline.websocket_manager.exchange.async_client_core import AsyncClientCore
 from streamline.logger import get_logger
 
 logger = get_logger()

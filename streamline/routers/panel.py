@@ -1,12 +1,13 @@
+from typing import Union
 from pydantic import BaseModel
 from fastapi import APIRouter
-from streamline.websocket_manager import WebsocketManagerFactory
+from streamline.websocket_manager import WebsocketManagerFactory, Interface
 
 from streamline.logger import get_logger
 
 panel_router = APIRouter()
 
-client = None
+client: Union[Interface, None] = None
 
 logger = get_logger()
 

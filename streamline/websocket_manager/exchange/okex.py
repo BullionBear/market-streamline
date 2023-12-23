@@ -1,7 +1,8 @@
-from streamline.websocket_manager.async_client_core import AsyncClientCore
+from .async_client_core import AsyncClientCore
+from .interface import Interface
 
 
-class OkexClient(AsyncClientCore):
+class OkexClient(AsyncClientCore, Interface):
     def __init__(self):
         super().__init__("wss://wsaws.okx.com:8443/ws/v5/public")
 
