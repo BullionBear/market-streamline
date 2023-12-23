@@ -19,13 +19,16 @@ class BinancedClient(AsyncClientCore, Interface):
     async def on_depth5(self, base, quote, instrument):
         if instrument.lower() != 'perp':
             raise ValueError(f"only instrument perp is acceptable")
-        self.channels = [('depth5', f'{base + quote}_{instrument}@{instrument}')]
+        self.channels += [f'depth5@{base + quote}_{instrument}@{instrument}']
         await self.subscribe(f"{base + quote}_{instrument}@depth5@100ms")
 
     async def off_depth5(self, base, quote, instrument):
         if instrument.lower() != 'perp':
             raise ValueError(f"only instrument perp is acceptable")
-        self.channels.remove(('depth5', f'{base + quote}@{instrument}'))
+        channel = f'depth5@{base + quote}@{instrument}'
+        if channel not in self.channels:
+            raise KeyError(f"{base + quote}@{instrument} is not accessible")
+        self.channels.remove(channel)
         await self.unsubscribe(f"{base + quote}_{instrument}@depth5@100ms")
 
     async def subscribe(self, *channels):

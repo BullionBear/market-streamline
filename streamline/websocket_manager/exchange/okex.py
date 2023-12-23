@@ -16,6 +16,22 @@ class OkexClient(AsyncClientCore, Interface):
     async def start(self, message_handler: callable):
         await super().start(message_handler)
 
+    async def on_depth5(self, base, quote, instrument):
+        self.channels += [f'depth5@{base + quote}@{instrument}']
+        if instrument == 'spot':
+            await self.subscribe({"channel": "books5", "instId": f"{base.upper()}-{quote.upper()}"})
+        elif instrument == 'perp':
+            await self.subscribe({"channel": "books5", "instId": f"{base.upper()}-{quote.upper()}-SWAP"})
+        else:
+            raise ValueError(f"instrument only support spot and perp")
+
+    async def off_depth5(self, base, quote, instrument):
+        channel = f'depth5@{base + quote}@{instrument}'
+        if channel not in self.channels:
+            raise KeyError(f"{base + quote}@{instrument} is not accessible")
+        self.channels.remove(channel)
+        await self.unsubscribe(f"{base + quote}@depth5@100ms")
+
     async def subscribe(self, *channels):
         self.channels += channels
         request = {

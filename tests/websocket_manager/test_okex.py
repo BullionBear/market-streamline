@@ -14,14 +14,16 @@ class TestOkexClient(unittest.TestCase):
         async def callback_func(message):
             print(message)
 
-        await client.subscribe({"channel": "books5", "instId": "BTC-USDT-SWAP"},
-                               {"channel": "books5", "instId": "ETH-USDT-SWAP"}
+        await client.subscribe({"channel": "books5", "instId": "BTC-USDT"},
+                               {"channel": "books5", "instId": "ETH-USDT"}
                                )
+        await client.subscribe({"channel": "books5", "instId": "BTC-USDT-SWAP"})
         await client.start(callback_func)
 
         # Example duration, modify as needed
         await asyncio.sleep(10)
 
+        await client.unsubscribe({"channel": "books5", "instId": "BTC-USDT"})
         await client.unsubscribe({"channel": "books5", "instId": "BTC-USDT-SWAP"})
         await asyncio.sleep(5)
         await client.stop()

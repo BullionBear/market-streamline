@@ -1,5 +1,9 @@
+from streamline.logger import get_logger
+
 from .async_client_core import AsyncClientCore
 from .interface import Interface
+
+logger = get_logger()
 
 
 class BinanceClient(AsyncClientCore, Interface):
@@ -19,13 +23,16 @@ class BinanceClient(AsyncClientCore, Interface):
     async def on_depth5(self, base, quote, instrument):
         if instrument.lower() != 'spot' or quote.lower() != 'usdt':
             raise ValueError(f"quote allow usdt and instrument allow spot only")
-        self.channels = [('depth5', f'{base + quote}@{instrument}')]
+        self.channels += [f'depth5@{base + quote}@{instrument}']
         await self.subscribe(f"{base + quote}@depth5@100ms")
 
     async def off_depth5(self, base, quote, instrument):
-        if instrument.lower() != 'spot' or quote.lower() != 'usdt':
-            raise ValueError(f"quote allow usdt and instrument allow spot only")
-        self.channels.remove(('depth5', f'{base + quote}@{instrument}'))
+        if instrument.lower() != 'spot':
+            raise ValueError(f"instrument allow spot only")
+        channel = f'depth5@{base + quote}@{instrument}'
+        if channel not in self.channels:
+            raise KeyError(f"{base + quote}@{instrument} is not accessible")
+        self.channels.remove(channel)
         await self.unsubscribe(f"{base + quote}@depth5@100ms")
 
     async def subscribe(self, *channels):

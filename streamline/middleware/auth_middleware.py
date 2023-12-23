@@ -9,7 +9,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         try:
             # Skip authentication for open endpoints
-            # if request.url.path.startswith("/public/"):
+            if request.url.path in ["/docs", "/redoc", "/openapi.json"]:
+                return await call_next(request)
             token = request.headers.get('Token')
             # Example condition that might raise an exception
             if not token or token != settings.API_KEY:

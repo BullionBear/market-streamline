@@ -1,6 +1,6 @@
 from typing import Union
 from pydantic import BaseModel
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from streamline.websocket_manager import WebsocketManagerFactory, Interface
 
 from streamline.logger import get_logger
@@ -13,7 +13,7 @@ logger = get_logger()
 
 
 async def message_handler(message):
-    print(message)
+    logger.debug(message)
 
 
 async def start_panel(exchange: str):
@@ -23,25 +23,49 @@ async def start_panel(exchange: str):
     await client.start(message_handler)
 
 
-@panel_router.get("/panel/status")
-async def get_info():
-    return {
+class StatusResponse(BaseModel):
+    ws: str
+    channels: list[str]
+
+
+@panel_router.get("/panel/status", response_model=StatusResponse)
+async def status():
+    response = {
         "ws": await client.get_ws_url(),
-        "channel": await client.get_channel()
+        "channels": await client.get_channel()
     }
+    return StatusResponse(**response)
 
 
-class SubscribePayload(BaseModel):
+class DepthPayload(BaseModel):
     base: str
     quote: str
+    instrument: str
 
 
-@panel_router.post("/panel/subscribe")
-async def subscribe(payload: SubscribePayload):
-    channel = f"{(payload.base + payload.quote).lower()}@depth5@100ms"
-    await client.subscribe(channel)
-    return {"channel": channel}
+class DepthResponse(BaseModel):
+    channels: list[str]
 
 
+@panel_router.post("/panel/on_depth5", response_model=DepthResponse)
+async def on_depth5(payload: DepthPayload):
+    try:
+        await client.on_depth5(payload.base, payload.quote, payload.instrument)
+        response = {
+            "channels": await client.get_channel()
+        }
+        return DepthResponse(**response)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
+@panel_router.post("/panel/off_depth5", response_model=DepthResponse)
+async def off_depth5(payload: DepthPayload):
+    try:
+        await client.off_depth5(payload.base, payload.quote, payload.instrument)
+        response = {
+            "channels": await client.get_channel()
+        }
+        return DepthResponse(**response)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
