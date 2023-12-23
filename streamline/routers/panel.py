@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 from fastapi import APIRouter
-from streamline.websocket_manager import BinanceClient
+from streamline.websocket_manager import WebsocketManagerFactory
 
 from streamline.logger import get_logger
 
 panel_router = APIRouter()
 
-client = BinanceClient()
+client = None
 
 logger = get_logger()
 
@@ -15,7 +15,9 @@ async def message_handler(message):
     print(message)
 
 
-async def start_panel():
+async def start_panel(exchange: str):
+    global client  # Use the global client variable
+    client = WebsocketManagerFactory.create_client(exchange)
     await client.connect()
     await client.start(message_handler)
 
