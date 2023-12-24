@@ -11,9 +11,8 @@ class PikaHandler:
         self.connection = None
         self.channel = None
         self.exchange = None
-        self.routing_key = None
 
-    async def connect(self, exchange_name, routing_key):
+    async def connect(self, exchange_name):
         self.connection = await aio_pika.connect_robust(
             host=self.uri,
             port=self.port,
@@ -27,12 +26,9 @@ class PikaHandler:
         # Declare the exchange
         self.exchange = await self.channel.declare_exchange(exchange_name, aio_pika.ExchangeType.DIRECT)
 
-        # Set the routing key
-        self.routing_key = routing_key
-
-    async def publish(self, message: pydantic.BaseModel):
+    async def publish(self, routing_key: str, message: pydantic.BaseModel):
         # Serialize the pydantic model to JSON string
-        json_message = message.json()
+        json_message = message.model_dump_json()
 
         # Convert the JSON string to bytes
         message_bytes = json_message.encode()
@@ -41,5 +37,4 @@ class PikaHandler:
         message = aio_pika.Message(body=message_bytes)
 
         # Publish the message using the channel, exchange, and routing key
-        await self.exchange.publish(message, routing_key=self.routing_key)
-
+        await self.exchange.publish(message, routing_key=routing_key)
