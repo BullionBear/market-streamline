@@ -8,6 +8,7 @@ class GetLogger:
     def get_logger():
         if GetLogger._logger is None:
             GetLogger._logger = logging.getLogger("market-streamline")
+            GetLogger._logger.propagate = False  # Prevent doubly stdout
             GetLogger._logger.setLevel(logging.DEBUG)
 
             # Create handlers, formatters and add them to the logger
