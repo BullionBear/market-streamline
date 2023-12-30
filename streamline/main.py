@@ -15,7 +15,9 @@ app.add_middleware(AuthMiddleware)
 async def startup_event():
     # Run startup routines for each router
     await start_ws_manager(settings.EXCHANGE)
-    await start_pika_handler(settings.EXCHANGE_NAM)
+    pika_url = settings.PIKA_URL
+    await start_pika_handler(settings.PIKA_EXCHANGE,
+                             pika_url.host, pika_url.username, pika_url.password, pika_url.port)
 
 
 
