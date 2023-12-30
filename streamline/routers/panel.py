@@ -19,17 +19,16 @@ async def message_handler(message):
     logger.debug(message)
 
 
-async def start_ws_manager(exchange: str):
+async def start_panel(exchange: str, pika_exchange: str, url: str, username: str, password: str, port: int):
     global client  # Use the global client variable
     client = WebsocketManagerFactory.create_client(exchange)
     await client.connect()
-    await client.start(message_handler)
 
-
-async def start_pika_handler(exchange_name: str, url: str, username: str, password: str, port: int):
     global pika_handler
     pika_handler = PikaHandler(url, username, password, port)
-    await pika_handler.connect(exchange_name)
+    await pika_handler.connect(pika_exchange)
+
+    await client.start(message_handler)
 
 
 
