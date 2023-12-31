@@ -2,12 +2,12 @@ import uvicorn
 from fastapi import FastAPI
 from .core.config import settings
 from .middleware.auth_middleware import AuthMiddleware
-from .routers import panel_router, start_panel
+from .routers import ws_panel_router, start_panel
 
 app = FastAPI()
 
 # Include routers
-app.include_router(panel_router)
+app.include_router(ws_panel_router)
 app.add_middleware(AuthMiddleware)
 
 

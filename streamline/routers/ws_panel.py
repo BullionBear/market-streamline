@@ -6,7 +6,7 @@ from streamline.message_handler import PikaHandler
 from streamline.logger import get_logger
 
 
-panel_router = APIRouter()
+ws_panel_router = APIRouter()
 
 client: Union[Interface, None] = None
 
@@ -31,13 +31,12 @@ async def start_panel(exchange: str, pika_exchange: str, url: str, username: str
     await client.start(message_handler)
 
 
-
 class StatusResponse(BaseModel):
     ws: str
     channels: list[str]
 
 
-@panel_router.get("/panel/status", response_model=StatusResponse)
+@ws_panel_router.get("/panel/status", response_model=StatusResponse)
 async def status():
     response = {
         "ws": await client.get_ws_url(),
@@ -56,10 +55,10 @@ class DepthResponse(BaseModel):
     channels: list[str]
 
 
-@panel_router.post("/panel/on_depth5", response_model=DepthResponse)
-async def on_depth5(payload: DepthPayload):
+@ws_panel_router.post("/panel/on_diff", response_model=DepthResponse)
+async def on_diff(payload: DepthPayload):
     try:
-        await client.on_depth5(payload.base, payload.quote, payload.instrument)
+        await client.on_diff(payload.base, payload.quote, payload.instrument)
         response = {
             "channels": await client.get_channel()
         }
@@ -68,10 +67,10 @@ async def on_depth5(payload: DepthPayload):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@panel_router.post("/panel/off_depth5", response_model=DepthResponse)
-async def off_depth5(payload: DepthPayload):
+@ws_panel_router.post("/panel/off_diff", response_model=DepthResponse)
+async def off_diff(payload: DepthPayload):
     try:
-        await client.off_depth5(payload.base, payload.quote, payload.instrument)
+        await client.off_diff(payload.base, payload.quote, payload.instrument)
         response = {
             "channels": await client.get_channel()
         }

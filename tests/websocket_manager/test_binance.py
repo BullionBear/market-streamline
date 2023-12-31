@@ -14,7 +14,7 @@ class TestBinanceClient(unittest.TestCase):
         async def callback_func(message):
             print(message)
 
-        await client.subscribe("btcusdt@depth5@100ms", "ethusdt@depth5@100ms")
+        await client.subscribe("btcusdt@depth@100ms", "ethusdt@depth    @100ms")
         await client.start(callback_func)
 
         # Example duration, modify as needed
