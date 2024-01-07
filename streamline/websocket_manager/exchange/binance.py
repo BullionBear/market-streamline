@@ -24,12 +24,12 @@ class BinanceClient(AsyncClientCore, Interface):
         if instrument.lower() != 'spot' or quote.lower() != 'usdt':
             raise ValueError(f"quote allow usdt and instrument allow spot only")
         self.channels += [f'depth@{base + quote}@{instrument}']
-        await self.subscribe(f"{base + quote}@depth5@100ms")
+        await self.subscribe(f"{base + quote}@depth@100ms")
 
     async def off_diff(self, base, quote, instrument):
         if instrument.lower() != 'spot':
             raise ValueError(f"instrument allow spot only")
-        channel = f'depth5@{base + quote}@{instrument}'
+        channel = f'depth@{base + quote}@{instrument}'
         if channel not in self.channels:
             raise KeyError(f"{base + quote}@{instrument} is not accessible")
         self.channels.remove(channel)
