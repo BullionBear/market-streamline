@@ -7,9 +7,6 @@ app = FastAPI()
 register_table = {}
 
 
-
-
-
 @app.post("/api/register")
 def register(request: Request, payload: RegisterPayload):
     client_host = request.client.host
